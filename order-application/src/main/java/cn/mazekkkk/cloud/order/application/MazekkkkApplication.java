@@ -10,6 +10,7 @@ import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * 启动类
@@ -17,15 +18,16 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @author maze
  * @createTime 18/10/16
  */
+@EnableAutoConfiguration
 @SpringBootApplication
 @EnableScheduling
-@EnableAutoConfiguration
 @EnableJms
 @RefreshScope
 @ComponentScan(basePackages = {"cn.mazekkkk.cloud.order"})
 @MapperScan("cn.mazekkkk.cloud.order.dao.mapper")
 @EnableDiscoveryClient
 @EnableFeignClients
+@EnableTransactionManagement
 public class MazekkkkApplication {
     public static void main(String args[]) {
         SpringApplication.run(MazekkkkApplication.class, args);

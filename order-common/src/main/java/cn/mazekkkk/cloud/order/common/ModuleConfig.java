@@ -1,5 +1,6 @@
 package cn.mazekkkk.cloud.order.common;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import com.github.pagehelper.PageHelper;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -16,8 +17,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 import tk.mybatis.spring.mapper.MapperScannerConfigurer;
 
 import javax.sql.DataSource;
@@ -28,8 +27,7 @@ import java.util.Properties;
  */
 @Configuration
 @EnableAutoConfiguration
-@EnableTransactionManagement
-public class ModuleConfig implements EnvironmentAware, TransactionManagementConfigurer {
+public class ModuleConfig implements EnvironmentAware {
 
     private RelaxedPropertyResolver propertyResolver;
     private RelaxedPropertyResolver jdbcPropertyResolver;
@@ -41,6 +39,17 @@ public class ModuleConfig implements EnvironmentAware, TransactionManagementConf
     }
 
     /**
+     * 事务管理器
+     *
+     * @param dataSource 数据源
+     * @return
+     */
+    @Bean
+    public PlatformTransactionManager txManager(DataSource dataSource) {
+        return new DataSourceTransactionManager(dataSource);
+    }
+
+    /**
      * 数据源管理
      *
      * @return
@@ -49,6 +58,7 @@ public class ModuleConfig implements EnvironmentAware, TransactionManagementConf
     @Primary
     @ConfigurationProperties(prefix = "spring.datasource")
     public DataSourceProperties primaryDataSourceProperties() {
+
         DataSourceProperties dataSourceProperties = new DataSourceProperties();
         dataSourceProperties.setUrl(jdbcPropertyResolver.getProperty("url"));
         dataSourceProperties.setUsername(jdbcPropertyResolver.getProperty("username"));
@@ -64,8 +74,22 @@ public class ModuleConfig implements EnvironmentAware, TransactionManagementConf
      */
     @Bean
     public DataSource primaryDataSource() {
-        DataSourceProperties dataSourceProperties = primaryDataSourceProperties();
-        return dataSourceProperties.initializeDataSourceBuilder().build();
+        DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setUrl(jdbcPropertyResolver.getProperty("url"));
+        //用户名
+        dataSource.setUsername(jdbcPropertyResolver.getProperty("username"));
+        //密码
+        dataSource.setPassword(jdbcPropertyResolver.getProperty("password"));
+        dataSource.setInitialSize(10);
+        dataSource.setMaxActive(50);
+        dataSource.setMinIdle(0);
+        dataSource.setMaxWait(60000);
+        dataSource.setValidationQuery("SELECT 1");
+        dataSource.setTestOnBorrow(false);
+        dataSource.setTestWhileIdle(true);
+        dataSource.setPoolPreparedStatements(false);
+        dataSource.setDefaultAutoCommit(false);
+        return dataSource;
     }
 
     /**
@@ -116,17 +140,6 @@ public class ModuleConfig implements EnvironmentAware, TransactionManagementConf
     }
 
     /**
-     * 数据源管理
-     *
-     * @return
-     */
-    @Bean
-    @Override
-    public PlatformTransactionManager annotationDrivenTransactionManager() {
-        return new DataSourceTransactionManager(primaryDataSource());
-    }
-
-    /**
      * Mybatis通用Mapper配置
      *
      * @return
@@ -134,7 +147,7 @@ public class ModuleConfig implements EnvironmentAware, TransactionManagementConf
     @Bean
     public MapperScannerConfigurer mapperScannerConfigurer() {
         MapperScannerConfigurer mapperScannerConfigurer = new MapperScannerConfigurer();
-        mapperScannerConfigurer.setBasePackage("cn.mazekkkk.cloud.product.dao.mapper");
+        mapperScannerConfigurer.setBasePackage("cn.mazekkkk.cloud.order.dao.mapper");
         Properties propertiesMapper = new Properties();
         propertiesMapper.setProperty("mappers", "tk.mybatis.mapper.common.Mapper");
         propertiesMapper.setProperty("IDENTITY", "SELECT REPLACE(UUID(),'-','')");

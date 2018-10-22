@@ -128,6 +128,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.43</version>
         </dependency>
         <dependency>
             <groupId>org.elasticsearch</groupId>
@@ -143,6 +144,11 @@
             <groupId>javax.persistence</groupId>
             <artifactId>persistence-api</artifactId>
             <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.0.19</version>
         </dependency>
         <!-- 持久层依赖 end -->
 

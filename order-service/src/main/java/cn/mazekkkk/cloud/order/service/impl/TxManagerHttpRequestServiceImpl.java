@@ -1,4 +1,4 @@
-package cn.mazekkkk.cloud.order.common;
+package cn.mazekkkk.cloud.order.service.impl;
 
 import com.codingapi.tx.netty.service.TxManagerHttpRequestService;
 import com.lorne.core.framework.utils.http.HttpUtils;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
  * @createTime 18/10/15
  */
 @Service
-public class TxManagerUrl implements TxManagerHttpRequestService {
+public class TxManagerHttpRequestServiceImpl implements TxManagerHttpRequestService {
 
 
     /**

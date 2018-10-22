@@ -8,11 +8,11 @@ public class Order {
 
     private Integer memberId;
 
-    private String name;
+    private String name = "";
 
     private String orderDescription;
 
-    private BigDecimal price;
+    private BigDecimal price = BigDecimal.ZERO;
 
     private Date createDatetime;
 
