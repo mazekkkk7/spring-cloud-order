@@ -57,10 +57,7 @@ public class OrderServiceImpl implements OrderService {
     public Boolean createOrder(CreateOrderCommand createOrderCommand) throws RuntimeException {
         Order order = new Order();
         order.setMemberId(createOrderCommand.getMemberId());
-        /**
-         * 演示异常
-         */
-//        int x = 1 / 0;
+
         orderMapper.insertSelective(order);
         OrderDetail orderDetail;
         for (Product product : createOrderCommand.getProductList()) {
@@ -76,6 +73,11 @@ public class OrderServiceImpl implements OrderService {
             order.setPrice(order.getPrice().add(orderDetail.getProductPrice()));
             order.setOrderDescription("信仰充值");
         }
+
+        /**
+         * 演示异常
+         */
+        int x = 1 / 0;
 
         orderMapper.updateByPrimaryKeySelective(order);
 

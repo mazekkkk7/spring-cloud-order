@@ -6,13 +6,11 @@ import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.bind.RelaxedPropertyResolver;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -39,41 +37,12 @@ public class ModuleConfig implements EnvironmentAware {
     }
 
     /**
-     * 事务管理器
-     *
-     * @param dataSource 数据源
-     * @return
-     */
-    @Bean
-    public PlatformTransactionManager txManager(DataSource dataSource) {
-        return new DataSourceTransactionManager(dataSource);
-    }
-
-    /**
      * 数据源管理
      *
      * @return
      */
     @Bean
-    @Primary
-    @ConfigurationProperties(prefix = "spring.datasource")
-    public DataSourceProperties primaryDataSourceProperties() {
-
-        DataSourceProperties dataSourceProperties = new DataSourceProperties();
-        dataSourceProperties.setUrl(jdbcPropertyResolver.getProperty("url"));
-        dataSourceProperties.setUsername(jdbcPropertyResolver.getProperty("username"));
-        dataSourceProperties.setPassword(jdbcPropertyResolver.getProperty("password"));
-        dataSourceProperties.setDriverClassName(jdbcPropertyResolver.getProperty("driver-class-name"));
-        return dataSourceProperties;
-    }
-
-    /**
-     * 数据源管理
-     *
-     * @return
-     */
-    @Bean
-    public DataSource primaryDataSource() {
+    public DataSource datasource() {
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl(jdbcPropertyResolver.getProperty("url"));
         //用户名
@@ -88,7 +57,6 @@ public class ModuleConfig implements EnvironmentAware {
         dataSource.setTestOnBorrow(false);
         dataSource.setTestWhileIdle(true);
         dataSource.setPoolPreparedStatements(false);
-        dataSource.setDefaultAutoCommit(false);
         return dataSource;
     }
 
@@ -99,9 +67,9 @@ public class ModuleConfig implements EnvironmentAware {
      * @throws Exception
      */
     @Bean
-    public SqlSessionFactory sqlSessionFactory() throws Exception {
+    public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
         SqlSessionFactoryBean sessionFactoryBean = new SqlSessionFactoryBean();
-        sessionFactoryBean.setDataSource(primaryDataSource());
+        sessionFactoryBean.setDataSource(dataSource);
         sessionFactoryBean.setTypeAliasesPackage(propertyResolver.getProperty("type-aliases-package"));
         sessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(propertyResolver.getProperty("mapper-locations")));
         sessionFactoryBean.setConfigurationProperties(getMyBatisProperties());
@@ -111,6 +79,17 @@ public class ModuleConfig implements EnvironmentAware {
         sessionFactoryBean.setPlugins(new Interceptor[]{pageHelper});
 
         return sessionFactoryBean.getObject();
+    }
+
+    /**
+     * 事务管理
+     *
+     * @return
+     */
+    @Bean(name = "transactionManager")
+    @ConditionalOnMissingBean({PlatformTransactionManager.class})
+    public PlatformTransactionManager transactionManager(DataSource dataSource) {
+        return new DataSourceTransactionManager(dataSource);
     }
 
     /**
