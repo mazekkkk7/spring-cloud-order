@@ -214,15 +214,4 @@
         <!-- 引入spring cloud的依赖 end -->
     </dependencyManagement>
 
-    <build>
-        <!-- 添加spring-boot的maven插件 start -->
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-        <!-- 添加spring-boot的maven插件 end -->
-    </build>
-
 </project>

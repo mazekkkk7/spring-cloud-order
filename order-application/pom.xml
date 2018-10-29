@@ -24,4 +24,47 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <!-- 添加spring-boot的maven插件 start -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!-- 添加spring-boot的maven插件 end -->
+            <!--docker plugins start-->
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>1.1.1</version>
+                <executions>
+                    <execution>
+                        <id>build-image</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <dockerCertPath>/Users/maze/.docker/machine/machines/default</dockerCertPath>
+                    <dockerHost>https://192.168.99.100:2376</dockerHost>
+                    <imageName>mazekkkk/spring-cloud-order:0.0.1</imageName>
+                    <dockerDirectory>${project.basedir}/src/main/docker</dockerDirectory>
+                    <resources>
+                        <resouce>
+                            <targetPath>/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resouce>
+                    </resources>
+                    <serverId>docker-hub</serverId>
+                    <forceTags>true</forceTags>
+                </configuration>
+            </plugin>
+            <!--docker plugins end-->
+        </plugins>
+    </build>
+
 </project>
